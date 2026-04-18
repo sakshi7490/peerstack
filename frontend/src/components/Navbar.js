@@ -11,8 +11,10 @@ function Navbar() {
   };
 
   return (
+    
     <div className="navbar">
       <h2 className="logo">PeerStack</h2>
+      
 
       <div className="nav-right">
         <button onClick={() => navigate("/dashboard")} className="nav-btn">

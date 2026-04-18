@@ -1,61 +1,151 @@
-.container {
-  max-width: 800px;
-  margin: 80px auto;
-  padding: 20px;
+body {
+  background: linear-gradient(135deg, #f5f7fa, #e4ecf7);
 }
 
-.title {
-  text-align: center;
+
+.dashboard-container {
+  margin-top: 90px;
+  padding: 20px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dashboard-header h2 {
+  margin-bottom: 5px;
+}
+
+.dashboard-header p {
+  color: gray;
   margin-bottom: 20px;
 }
 
-.top-section {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
+/* 🔥 Start Card */
+.start-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
-.select {
+.start-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.start-controls select {
   padding: 8px;
   border-radius: 6px;
 }
 
-.start-btn {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 6px;
-  background: #007bff;
-  color: white;
-  cursor: pointer;
+/* 🔥 Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
 }
 
-.start-btn:hover {
-  background: #0056b3;
-}
+/* 🔥 Cards */
+.interview-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-.history-title {
-  margin-bottom: 15px;
-}
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 
-.card {
-  background: #fff;
   padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: 0.3s;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  transition: all 0.35s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
-.card:hover {
-  transform: scale(1.02);
+.interview-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(
+    120deg,
+    rgba(0, 123, 255, 0.2),
+    rgba(0, 198, 255, 0.2)
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.role {
-  font-weight: bold;
-  margin-bottom: 5px;
+.interview-card:hover::before {
+  opacity: 1;
 }
 
-.score {
-  color: #555;
+.interview-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(0, 123, 255, 0.25);
+}
+
+/* 🔥 Card sections */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot.green {
+  background: #28a745;
+}
+
+.dot.orange {
+  background: #ff9800;
+}
+.card-footer {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #007bff;
+  transition: 0.2s;
+}
+
+.card-footer:hover {
+  letter-spacing: 0.5px;
+  text-decoration: underline;
+}
+
+/* Empty */
+.empty {
+  text-align: center;
+  color: gray;
+}
+
+button {
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 500;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }

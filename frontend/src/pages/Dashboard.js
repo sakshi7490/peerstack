@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 import "../styles/dashboard.css";
 import "../styles/result.css";
 
@@ -52,73 +53,88 @@ function Dashboard() {
   <>
     <Navbar />
 
-    <div className="container">
-      <h2 className="title">Dashboard</h2>
+    <div className="dashboard-container">
+      
+      {/* 🔥 Header */}
+      <div className="dashboard-header">
+        <h2> Your Interview Space</h2>
+        <p>Track, practice, and improve</p>
+      </div>
 
-      {/* 🔥 Start Section */}
-      <div className="top-section">
-        <select
-          className="select"
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="backend">Backend</option>
-          <option value="frontend">Frontend</option>
-          <option value="aiml">AI/ML</option>
-          <option value="hr">HR</option>
-        </select>
+      {/* 🔥 Start Interview Card */}
+      <div className="start-card">
+        <h3>Start New Interview</h3>
 
-        <button onClick={startInterview} disabled={loading}>
-          {loading ? "Starting..." : "Start Interview"}
-        </button>
+        <div className="start-controls">
+          <select onChange={(e) => setRole(e.target.value)}>
+            <option value="backend">Backend</option>
+            <option value="frontend">Frontend</option>
+            <option value="aiml">AI/ML</option>
+            <option value="hr">HR</option>
+          </select>
+
+          <button onClick={startInterview} disabled={loading}>
+            {loading ? "Starting..." : "Start Interview"}
+          </button>
+        </div>
       </div>
 
       {/* 🔥 History */}
-      <h3 className="history-title">Past Interviews</h3>
+      <h3 className="section-title">Your Interviews</h3>
 
-      {interviews.length === 0 ? (
-        <p>No interviews yet</p>
-      ) : (
-        interviews.map((item) => (
-          <div
-            key={item._id}
-            className="card"
-            style={{
-              cursor:
-                item.status === "completed" ? "pointer" : "not-allowed",
-              opacity: item.status === "completed" ? 1 : 0.7,
-            }}
-            onClick={() => {
-              if (item.status === "completed") {
+      <div className="card-grid">
+        {interviews.length === 0 ? (
+          <p className="empty">No interviews yet</p>
+        ) : (
+          interviews.map((item, index) => (
+            <motion.div
+              key={item._id}
+              className="interview-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.03 }}
+              onClick={() => {
+                if (item.status === "completed") {
                 navigate(`/result/${item._id}`);
-              }
-            }}
-          >
-            <p><b>Role:</b> {item.role}</p>
-
-            <p>
-              <b>Status:</b>{" "}
-              <span
-                style={{
-                  color:
-                    item.status === "completed" ? "green" : "orange",
-                  fontWeight: "bold",
+                } else {
+                    navigate(`/interview/${item._id}`);
+                  }
                 }}
-              >
-                {item.status === "completed"
-                  ? "Completed"
-                  : "Pending"}
-              </span>
-            </p>
+            >
+              <div className="card-top">
+                <h4>{item.role.toUpperCase()}</h4>
 
-            <p>
-              <b>Score:</b>{" "}
-              {item.status === "completed"
-                ? `${item.score}/10`
-                : "Not evaluated"}
-            </p>
-          </div>
-        ))
-      )}
+                <div className="status">
+                  <span
+                    className={`dot ${
+                      item.status === "completed" ? "green" : "orange"
+                    }`}
+                  ></span>
+                  {item.status}
+                </div>
+              </div>
+
+              <div className="card-body">
+                <p>
+                  <b>Score:</b>{" "}
+                  {item.status === "completed"
+                    ? `${item.score}/10`
+                    : "Not evaluated"}
+                </p>
+
+                <p><b>Questions:</b> {item.questions.length}</p>
+              </div>
+
+              <div className="card-footer">
+                {item.status === "completed"
+                  ? "View Result →"
+                  : "Complete Interview"}
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
     </div>
   </>
 );

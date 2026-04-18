@@ -57,7 +57,7 @@ function Register() {
       Already have an account?{" "}
       <span
         className="link"
-        onClick={() => (window.location.href = "/")}
+        onClick={() => (navigate("/"))}
       >
         Login
       </span>
