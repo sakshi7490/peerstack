@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import API from "../services/api";
 import "../styles/interview.css";
 import Navbar from "../components/Navbar";
@@ -8,6 +9,8 @@ import Navbar from "../components/Navbar";
 function Interview() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  
 
   const [time, setTime] = useState(300);
   const [questions, setQuestions] = useState([]);
@@ -37,21 +40,23 @@ function Interview() {
     fetchInterview();
   }, [id]);
 
+  
+
   // ✅ Timer
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTime((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmit(); // auto submit
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+  const timer = setInterval(() => {
+    setTime((prev) => {
+      if (prev <= 1) {
+        clearInterval(timer);
+        submitRef.current(); // ✅ use ref
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
+  return () => clearInterval(timer);
+}, []);
 
   // ✅ Handle input
   const handleChange = (index, value) => {
@@ -74,6 +79,9 @@ function Interview() {
       toast.error("Error submitting answers");
     }
   };
+
+  const submitRef = useRef(handleSubmit);
+  
 
   return (
     <>

@@ -60,6 +60,7 @@ function Dashboard() {
         <h2> Your Interview Space</h2>
         <p>Track, practice, and improve</p>
       </div>
+      <div className="header-line"></div>
 
       {/* 🔥 Start Interview Card */}
       <div className="start-card">

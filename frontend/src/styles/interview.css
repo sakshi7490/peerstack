@@ -1,8 +1,19 @@
+body {
+  background: linear-gradient(135deg, #eef2ff, #f8fafc);
+  font-family: "Inter", sans-serif;
+}
+
+
 .container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  margin-top: 90px;
+  max-width: 650px;
+  margin: 100px auto;
+  padding: 30px;
+
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .title {
@@ -10,49 +21,87 @@
 }
 
 .timer {
-  display: block;
   text-align: center;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4f46e5;
   margin-bottom: 10px;
 }
 
 .input-box {
   width: 100%;
   padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  margin-top: 8px;
+
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-box:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .question-card {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 12px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+
+  transition: all 0.2s ease;
+}
+
+.question-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .submit-btn {
   width: 100%;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px;
+  margin-top: 10px;
+
+  border-radius: 10px;
   border: none;
-  background: #007bff;
+
+  background: linear-gradient(135deg, #6366f1, #22c55e);
   color: white;
+  font-weight: 500;
+
   cursor: pointer;
+  transition: 0.3s;
 }
 
-/* 🔥 Progress Bar */
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25);
+}
+
 .progress-container {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+.progress-container p {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 6px;
 }
 
 .progress-bar-bg {
   width: 100%;
-  height: 10px;
-  background: #ddd;
-  border-radius: 5px;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: #28a745;
-  border-radius: 5px;
-  transition: 0.3s;
+  background: linear-gradient(90deg, #6366f1, #22c55e);
+  border-radius: 10px;
+  transition: width 0.3s ease;
 }
