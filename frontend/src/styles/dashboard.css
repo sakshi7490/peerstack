@@ -1,0 +1,61 @@
+.container {
+  max-width: 800px;
+  margin: 80px auto;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.top-section {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.select {
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.start-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.start-btn:hover {
+  background: #0056b3;
+}
+
+.history-title {
+  margin-bottom: 15px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.role {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.score {
+  color: #555;
+}
