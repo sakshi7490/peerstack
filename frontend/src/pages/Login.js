@@ -2,66 +2,71 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import API from "../services/api";
-import "../styles/login.css";
+import "../styles/auth.css";
 
 function Login() {
-
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-  try {
-    setLoading(true); //  start loading
+  const handleLogin = async (e) => {
+    e.preventDefault(); // ✅ prevent page reload
 
-    const res = await API.post("/auth/login", { email, password });
+    if (!email || !password) {
+      return toast.error("All fields are required");
+    }
 
-    localStorage.setItem("token", res.data.token);
+    try {
+      setLoading(true);
 
-    toast.success("Login successful 🎉");
+      const res = await API.post("/auth/login", { email, password });
 
-    navigate("/dashboard");
+      localStorage.setItem("token", res.data.token);
 
-  } catch (err) {
-    toast.error("Invalid email or password ❌");
-  } finally {
-    setLoading(false); //  stop loading
-  }
-};
+      toast.success("Login successful 🎉");
+      navigate("/dashboard");
+
+    } catch (err) {
+      toast.error("Invalid email or password ❌");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-  <div className="container">
-    <h2>Login</h2>
+    <div className="auth-container">
+      <h2 className="auth-title">Continue your interview journey</h2>
 
-    <input
-      className="input"
-      placeholder="Email"
-      onChange={(e) => setEmail(e.target.value)}
-    />
+      <form className="auth-form" onSubmit={handleLogin}>
+        <input
+          className="auth-input"
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-    <input
-      className="input"
-      type="password"
-      placeholder="Password"
-      onChange={(e) => setPassword(e.target.value)}
-    />
+        <input
+          className="auth-input"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-    <button className="button" onClick={handleLogin} disabled={loading}>
-      {loading ? "Logging in..." : "Login"}
-    </button>
+        <button className="auth-btn" type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
 
-    <p style={{ marginTop: "15px" }}>
-      Don’t have an account?{" "}
-      <span
-        className="link"
-        onClick={() => (navigate("/register"))}
-      >
-        Register
-      </span>
-    </p>
-  </div>
-);
+      <p className="auth-footer">
+        Don’t have an account?{" "}
+        <span onClick={() => navigate("/register")}>Register</span>
+      </p>
+    </div>
+  );
 }
 
 export default Login;

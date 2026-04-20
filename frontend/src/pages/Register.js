@@ -2,16 +2,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import toast from "react-hot-toast";
-import "../styles/register.css";
+import "../styles/auth.css";
 
 function Register() {
-
   const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault(); // ✅ important (form reload rokne ke liye)
+
     try {
       await API.post("/auth/register", {
         name,
@@ -20,50 +22,52 @@ function Register() {
       });
 
       toast.success("Registered successfully");
-       navigate("/");
+      navigate("/");
     } catch (err) {
       toast.error("Registration failed");
     }
   };
 
   return (
-  <div className="container">
-    <h2>Register</h2>
+    <div className="auth-container">
+      <h2 className="auth-title">Create Account</h2>
 
-    <input
-      className="input"
-      placeholder="Name"
-      onChange={(e) => setName(e.target.value)}
-    />
+      <form className="auth-form" onSubmit={handleRegister}>
+        <input
+          className="auth-input"
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-    <input
-      className="input"
-      placeholder="Email"
-      onChange={(e) => setEmail(e.target.value)}
-    />
+        <input
+          className="auth-input"
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-    <input
-      className="input"
-      type="password"
-      placeholder="Password"
-      onChange={(e) => setPassword(e.target.value)}
-    />
+        <input
+          className="auth-input"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-    <button className="button" onClick={handleRegister}>
-      Register
-    </button>
+        <button className="auth-btn" type="submit">
+          Register
+        </button>
+      </form>
 
-    <p style={{ marginTop: "15px" }}>
-      Already have an account?{" "}
-      <span
-        className="link"
-        onClick={() => (navigate("/"))}
-      >
-        Login
-      </span>
-    </p>
-  </div>
-);
+      <p className="auth-footer">
+        Already have an account?{" "}
+        <span onClick={() => navigate("/")}>Login</span>
+      </p>
+    </div>
+  );
 }
 
 export default Register;
