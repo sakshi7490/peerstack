@@ -46,44 +46,63 @@ function Result() {
   <>
     <Navbar />
 
-    <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
-      <div className="container">
-        <h2 className="title">Interview Result</h2>
+    <div className="result-container">
 
-        <div className="score-card">
-          <h3>
-            Score: {data.feedback && data.score !== undefined
-            ? `${data.score}/10`
-            : "Not evaluated"}
-          </h3>
+      {/* 🔥 Header */}
+      <div className="result-header">
+        <h2>Interview Analysis</h2>
+        <p>Your performance breakdown</p>
+      </div>
+
+      {/* 🔥 Score Card */}
+      <div className="score-card">
+        <div className="score-circle">
+          {data.feedback ? data.score : "--"}
         </div>
+        <p>
+          {data.feedback ? "Overall Score" : "Not Evaluated Yet"}
+        </p>
+      </div>
 
-        <h4>Feedback</h4>
+      {/* 🔥 Feedback Section */}
+      <div className="section">
+        <h3>AI Feedback</h3>
+
         <div className="feedback-box">
           {data.feedback ? (
-          data.feedback.split("\n").map((line, index) => (
-          <p key={index}>{line}</p>
+            data.feedback.split("\n").map((line, index) => (
+              <p key={index}>{line}</p>
             ))
           ) : (
-                <p>No feedback available</p>
+            <p>Complete interview to see feedback</p>
           )}
         </div>
-
-        <h4>Questions & Answers</h4>
-        {data.questions.map((q, index) => (
-          <div key={index} className="qa-card">
-            <p><b>Q:</b> {q.question}</p>
-            <p><b>A:</b> {q.answer || "Not answered"}</p>
-          </div>
-        ))}
-
-        <button
-          className="button"
-          onClick={() => navigate("/dashboard")}
-        >
-          Go to Dashboard
-        </button>
       </div>
+
+      {/* 🔥 Q&A Section */}
+      <div className="section">
+        <h3>Questions & Answers</h3>
+
+        <div className="qa-grid">
+          {data.questions.map((q, index) => (
+            <div key={index} className="qa-card">
+              <p className="question">{q.question}</p>
+              <p className="answer">
+                {q.answer || "Not answered"}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 🔥 Button */}
+      <button
+        className="result-btn"
+        onClick={() => navigate("/dashboard")}
+      >
+        ← Back to Dashboard
+      </button>
+
     </div>
   </>
 );

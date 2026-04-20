@@ -2,6 +2,23 @@ body {
   background: linear-gradient(135deg, #eef2ff, #f8fafc);
   font-family: "Inter", sans-serif;
 }
+:root {
+  --primary: #4f46e5;       /* Indigo */
+  --primary-light: #6366f1;
+  --accent: #06b6d4;        /* Cyan */
+
+  --bg: #f8fafc;
+  --card: #ffffff;
+
+  --text: #0f172a;
+  --subtext: #64748b;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --border: #e2e8f0;
+}
 
 
 .container {
