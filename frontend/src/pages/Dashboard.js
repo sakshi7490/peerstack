@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
+import ResumeUploadCard from "../components/ResumeUploadCard";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import "../styles/dashboard.css";
@@ -66,7 +67,7 @@ function Dashboard() {
 
         {/* 🔥 Start Interview */}
         <div className="start-card">
-          <h3>Start New Interview</h3>
+          <h3>Begin AI Mock Interview</h3>
 
           <div className="start-controls">
             <select
@@ -84,6 +85,8 @@ function Dashboard() {
             </button>
           </div>
         </div>
+
+        <ResumeUploadCard />
 
         {/* 🔥 History */}
         <h3 className="section-title">Your Interviews</h3>
