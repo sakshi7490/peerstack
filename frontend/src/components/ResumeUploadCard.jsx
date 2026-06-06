@@ -1,16 +1,34 @@
 import React, { useState } from "react";
+import API from "../services/api";
 import "../styles/resumeUpload.css";
 
 function ResumeUploadCard() {
   const [fileName, setFileName] = useState("");
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = async (e) => {
+  const file = e.target.files[0];
 
-    if (file) {
-      setFileName(file.name);
-    }
-  };
+  if (!file) return;
+
+  setFileName(file.name);
+
+  const formData = new FormData();
+  formData.append("resume", file);
+
+  try {
+
+    const res = await API.post(
+      "/interview/upload-resume",
+      formData
+    );
+
+    console.log(res.data.extractedText);
+
+  } catch (err) {
+    console.log(err);
+  }
+  
+};
 
   return (
     <div className="resume-card">
