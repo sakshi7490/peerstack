@@ -47,26 +47,46 @@ function Result() {
     <Navbar />
 
     <div className="result-container">
-
-      {/* 🔥 Header */}
       <div className="result-header">
+        <span className="result-badge">
+          {data.role === "resume-based"
+            ? "📄 Resume-Based Interview"
+            : "Standard Interview"}
+        </span>
+
         <h2>Interview Analysis</h2>
-        <p>Your performance breakdown</p>
+        <p>Your performance breakdown and improvement roadmap</p>
       </div>
 
-      {/* 🔥 Score Card */}
       <div className="score-card">
-        <div className="score-circle">
-          {data.feedback ? data.score : "--"}
+        <div className="score-left">
+          <div className={`score-circle ${data.score <= 3 ? "low" : data.score <= 6 ? "medium" : "high"}`}>
+            {data.feedback ? data.score : "--"}
+          </div>
+
+          <div>
+            <h3>
+              {data.score <= 3
+                ? "Needs Improvement"
+                : data.score <= 6
+                ? "Average Performance"
+                : "Strong Performance"}
+            </h3>
+            <p>Overall Score</p>
+          </div>
         </div>
-        <p>
-          {data.feedback ? "Overall Score" : "Not Evaluated Yet"}
-        </p>
+
+        <div className="score-meta">
+          <p><b>Questions:</b> {data.questions.length}</p>
+          <p>
+            <b>Answered:</b>{" "}
+            {data.questions.filter((q) => q.answer && q.answer.trim() !== "").length}
+          </p>
+        </div>
       </div>
 
-      {/* 🔥 Feedback Section */}
       <div className="section">
-        <h3>AI Feedback</h3>
+        <h3>🤖 AI Assessment</h3>
 
         <div className="feedback-box">
           {data.feedback ? (
@@ -79,30 +99,30 @@ function Result() {
         </div>
       </div>
 
-      {/* 🔥 Q&A Section */}
       <div className="section">
         <h3>Questions & Answers</h3>
 
         <div className="qa-grid">
           {data.questions.map((q, index) => (
             <div key={index} className="qa-card">
+              <span className="question-label">Question {index + 1}</span>
               <p className="question">{q.question}</p>
-              <p className="answer">
-                {q.answer || "Not answered"}
-              </p>
+
+              <div className="answer-box">
+                <span>Your Answer</span>
+                <p>{q.answer || "Not answered"}</p>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* 🔥 Button */}
       <button
         className="result-btn"
         onClick={() => navigate("/dashboard")}
       >
         ← Back to Dashboard
       </button>
-
     </div>
   </>
 );
