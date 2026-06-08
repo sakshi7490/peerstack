@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import "../styles/resumeUpload.css";
 
 function ResumeUploadCard() {
+  const navigate = useNavigate();
   const [fileName, setFileName] = useState("");
 
   const handleFileChange = async (e) => {
@@ -16,18 +18,19 @@ function ResumeUploadCard() {
   formData.append("resume", file);
 
   try {
-
     const res = await API.post(
       "/interview/upload-resume",
       formData
     );
 
-    console.log(res.data.extractedText);
+    navigate(`/interview/${res.data.data._id}`);
+
+    console.log("Generated Questions:");
+    console.log(res.data.questions);
 
   } catch (err) {
     console.log(err);
   }
-  
 };
 
   return (

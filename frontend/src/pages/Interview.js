@@ -12,7 +12,7 @@ function Interview() {
   
   
 
-  const [time, setTime] = useState(300);
+  const [time, setTime] = useState(1000);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
 

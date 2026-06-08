@@ -1,5 +1,8 @@
 const express = require("express");
+const Interview = require("../models/interview.model");
+
 const extractResumeText = require("../utils/resumeParser");
+const { generateResumeQuestions } = require("../utils/ai.service");
 
 const authMiddleware = require("../middleware/auth.middleware");
 const upload = require("../middleware/upload.middleware");
@@ -25,16 +28,28 @@ router.post(
         });
       }
 
-      const resumeText = await extractResumeText(
-        req.file.buffer
-      );
+      const resumeText = await extractResumeText(req.file.buffer);
 
-      res.status(200).json({
+      const questionsArray = await generateResumeQuestions(resumeText);
+
+      const formattedQuestions = questionsArray.map((q) => ({
+        question: q,
+        answer: "",
+      }));
+
+      const interview = await Interview.create({
+        userId: req.user,
+        role: "resume-based",
+        questions: formattedQuestions,
+        score: 0,
+        feedback: "",
+        status: "pending",
+      });
+
+      res.status(201).json({
         success: true,
-        fileName: req.file.originalname,
-
-        // temporary
-        extractedText: resumeText,
+        message: "Resume-based interview created",
+        data: interview,
       });
 
     } catch (err) {
@@ -42,7 +57,7 @@ router.post(
 
       res.status(500).json({
         success: false,
-        message: "Resume parsing failed",
+        message: "Resume interview creation failed",
       });
     }
   }

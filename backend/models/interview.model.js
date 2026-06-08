@@ -8,7 +8,8 @@ const interviewSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["frontend", "backend", "aiml", "hr"],
+      enum: ["frontend", "backend", "aiml", "hr","resume-based"],
+      required: true,
     },
     questions: [
       {
