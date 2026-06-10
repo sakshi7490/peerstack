@@ -40,11 +40,13 @@ router.post(
       const interview = await Interview.create({
         userId: req.user,
         role: "resume-based",
+        interviewType: "resume",
+        resumeText,
         questions: formattedQuestions,
         score: 0,
         feedback: "",
         status: "pending",
-      });
+    });
 
       res.status(201).json({
         success: true,

@@ -4,7 +4,7 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
+
 
 exports.generateQuestions = async (role) => {
   try {
@@ -13,22 +13,46 @@ exports.generateQuestions = async (role) => {
     }
 
     const prompt = `
-You are an expert interview question generator.
+You are an expert technical interviewer.
 
-Generate exactly 5 interview questions for a ${role} role.
+Evaluate the candidate's interview answers.
+
+Questions:
+${JSON.stringify(questions, null, 2)}
+
+Answers:
+${JSON.stringify(answers, null, 2)}
+
+Return feedback in the following exact format:
+
+Score: <score>/10
+
+Technical Understanding: <score>/10
+Communication Clarity: <score>/10
+Answer Depth: <score>/10
+Practical Examples: <score>/10
+
+Strengths:
+- point 1
+- point 2
+
+Weaknesses:
+- point 1
+- point 2
+
+Suggestions:
+- point 1
+- point 2
+
+Recommended Learning Path:
+1. topic 1
+2. topic 2
+3. topic 3
 
 Rules:
-- Questions should be practical and interview-style.
-- Keep questions clear and beginner-to-intermediate level.
-- Return only a JSON array of strings.
-- Do not add markdown.
-- Do not add explanation.
-
-Example format:
-[
-  "What is Node.js?",
-  "Explain REST API"
-]
+- Be honest but supportive.
+- Keep feedback clear and beginner-friendly.
+- Do not add extra headings outside this format.
 `;
 
     const response = await genAI.models.generateContent({
@@ -128,34 +152,100 @@ ${resumeText}
   }
 };
 
+
 // 🔥 EVALUATE ANSWERS
-exports.evaluateAnswers = async (questions, answers) => {
+exports.evaluateAnswers = async (questions, answers, resumeText = "") => {
   try {
-    if (!openai) throw new Error("No API Key");
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("Gemini API key missing");
+    }
+
+
+    const resumeContext = resumeText
+      ? `
+Candidate Resume Context:
+${resumeText}
+`
+      : "";
 
     const prompt = `
-    Evaluate the following interview answers.
+You are an expert technical interviewer.
 
-    Questions: ${questions}
-    Answers: ${answers.join("\n")}
+${resumeContext}
 
-    Give:
-    - Score out of 10
-    - Feedback
-    - Suggestions
-    `;
+Evaluate the candidate's interview answers.
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-    });
+Questions:
+${JSON.stringify(questions, null, 2)}
 
-    return response.choices[0].message.content;
+Answers:
+${JSON.stringify(answers, null, 2)}
+
+Evaluate based on:
+1. Technical correctness
+2. Depth of explanation
+3. Communication clarity
+4. Practical examples
+5. Resume relevance if resume context is available
+
+Return feedback in the following exact format:
+
+Score: <score>/10
+
+Technical Understanding: <score>/10
+Communication Clarity: <score>/10
+Answer Depth: <score>/10
+Practical Examples: <score>/10
+
+Resume-Based Observations:
+- point 1
+- point 2
+
+Strengths:
+- point 1
+- point 2
+
+Weaknesses:
+- point 1
+- point 2
+
+Suggestions:
+- point 1
+- point 2
+
+Recommended Learning Path:
+1. topic 1
+2. topic 2
+3. topic 3
+
+Rules:
+- Be honest but supportive.
+- Keep feedback beginner-friendly.
+- Do not write long paragraphs.
+- Each bullet point must be short and clear.
+- Each bullet point must be maximum 1 sentence.
+- Resume-Based Observations must contain exactly 2 bullet points.
+- Strengths must contain exactly 3 bullet points.
+- Weaknesses must contain exactly 3 bullet points.
+- Suggestions must contain exactly 3 bullet points.
+- Recommended Learning Path must contain exactly 3 numbered topics.
+- If resume context is available, mention relevant resume skills/projects in Resume-Based Observations.
+- If resume context is not available, write exactly:
+Resume-Based Observations:
+- No resume context was provided for this interview.
+- Do not add extra headings outside the given format.
+`;
+
+    const response = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+  });
+
+  return response.text;
 
   } catch (error) {
     console.log("AI failed, using fallback evaluation");
 
-    // ✅ FALLBACK EVALUATION
     let score = 0;
 
     answers.forEach((ans) => {
@@ -163,16 +253,39 @@ exports.evaluateAnswers = async (questions, answers) => {
       else if (ans.length > 10) score += 1;
     });
 
+    const hasResume = resumeText && resumeText.trim() !== "";
+
     return `
 Score: ${score}/10
 
-Feedback:
+Technical Understanding: ${Math.min(score, 10)}/10
+Communication Clarity: ${Math.min(score + 1, 10)}/10
+Answer Depth: ${Math.min(score, 10)}/10
+Practical Examples: ${score >= 6 ? 5 : 2}/10
+
+Resume-Based Observations:
+${hasResume
+  ? `- Candidate resume context was available during evaluation.
+- Answers should connect more clearly with the skills and projects mentioned in the resume.`
+  : `- No resume context was provided for this interview.`}
+
+Strengths:
 - Basic understanding detected
-- Try to explain concepts more clearly
+- Attempted to answer the questions
+
+Weaknesses:
+- Answers need more depth
+- Some explanations are too short
 
 Suggestions:
 - Add real-world examples
-- Improve depth of answers
+- Explain concepts step-by-step
+- Connect answers with projects and skills mentioned in the resume when relevant
+
+Recommended Learning Path:
+1. Revise core concepts of the selected role
+2. Practice explaining answers in 4-5 lines
+3. Build small practical projects and connect answers with them
 `;
   }
 };

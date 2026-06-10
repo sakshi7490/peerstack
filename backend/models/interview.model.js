@@ -20,6 +20,16 @@ const interviewSchema = new mongoose.Schema(
     feedback: {
   type: String,
 },
+resumeText: {
+  type: String,
+  default: "",
+},
+
+interviewType: {
+  type: String,
+  enum: ["standard", "resume"],
+  default: "standard",
+},
 status: {
     type: String,
     enum: ["pending", "completed"],
@@ -30,6 +40,7 @@ status: {
       default: 0,
     },
   },
+  
   
   { timestamps: true }
 );

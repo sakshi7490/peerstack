@@ -29,7 +29,9 @@ exports.startInterview = async (req, res) => {
       questions: formattedQuestions, 
       score: 0,
       feedback: "",
-      status: "pending"
+      status: "pending",
+      resumeText: resumeText,
+      interviewType: "resume",
     });
 
     res.json({
@@ -46,6 +48,7 @@ exports.startInterview = async (req, res) => {
     });
   }
 };
+
 
 
 // SUBMIT ANSWERS (AI VERSION)
@@ -88,7 +91,12 @@ exports.submitAnswers = async (req, res) => {
     const questionsList = interview.questions.map(q => q.question);
     const answersList = interview.questions.map(q => q.answer);
 
-    const aiFeedback = await evaluateAnswers(questionsList, answersList);
+    
+    const aiFeedback = await evaluateAnswers(
+  questionsList,
+  answersList,
+  interview.resumeText
+);
 
     // ✅ Store feedback
     interview.feedback = aiFeedback;

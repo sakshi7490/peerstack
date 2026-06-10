@@ -10,6 +10,44 @@ function Result() {
 
   const [data, setData] = useState(null);
 
+  const parseFeedback = (feedback) => {
+  if (!feedback) return {};
+
+  const sections = {
+    strengths: [],
+    weaknesses: [],
+    suggestions: [],
+    learningPath: [],
+  };
+
+  const lines = feedback.split("\n");
+
+  let currentSection = "";
+
+  lines.forEach((line) => {
+    line = line.trim();
+
+    if (line.startsWith("Strengths:")) {
+      currentSection = "strengths";
+    } else if (line.startsWith("Weaknesses:")) {
+      currentSection = "weaknesses";
+    } else if (line.startsWith("Suggestions:")) {
+      currentSection = "suggestions";
+    } else if (line.startsWith("Recommended Learning Path:")) {
+      currentSection = "learningPath";
+    } else if (
+      line.startsWith("-") ||
+      /^\d+\./.test(line)
+    ) {
+      sections[currentSection]?.push(
+        line.replace(/^-\s*/, "")
+      );
+    }
+  });
+
+  return sections;
+};
+
   useEffect(() => {
     const fetchResult = async () => {
       try {
@@ -41,6 +79,10 @@ function Result() {
     </>
   );
 }
+
+const feedbackData = parseFeedback(
+  data?.feedback || ""
+);
 
   return (
   <>
@@ -88,15 +130,41 @@ function Result() {
       <div className="section">
         <h3>🤖 AI Assessment</h3>
 
-        <div className="feedback-box">
-          {data.feedback ? (
-            data.feedback.split("\n").map((line, index) => (
-              <p key={index}>{line}</p>
-            ))
-          ) : (
-            <p>Complete interview to see feedback</p>
-          )}
-        </div>
+        <div className="feedback-grid">
+
+  <div className="feedback-card strengths">
+    <h4>✅ Strengths</h4>
+
+    {feedbackData.strengths.map((item, i) => (
+      <p key={i}>{item}</p>
+    ))}
+  </div>
+
+  <div className="feedback-card weaknesses">
+    <h4>⚠ Weaknesses</h4>
+
+    {feedbackData.weaknesses.map((item, i) => (
+      <p key={i}>{item}</p>
+    ))}
+  </div>
+
+  <div className="feedback-card suggestions">
+    <h4>💡 Suggestions</h4>
+
+    {feedbackData.suggestions.map((item, i) => (
+      <p key={i}>{item}</p>
+    ))}
+  </div>
+
+  <div className="feedback-card roadmap">
+    <h4>🚀 Learning Path</h4>
+
+    {feedbackData.learningPath.map((item, i) => (
+      <p key={i}>{item}</p>
+    ))}
+  </div>
+
+</div>
       </div>
 
       <div className="section">
