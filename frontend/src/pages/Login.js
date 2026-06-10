@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, {useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import toast from "react-hot-toast";
 import API from "../services/api";
 import "../styles/auth.css";
@@ -10,6 +11,16 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+  const savedEmail = localStorage.getItem("rememberedEmail");
+
+  if (savedEmail) {
+    setEmail(savedEmail);
+    setRememberMe(true);
+  }
+}, []);
 
   const handleLogin = async (e) => {
     e.preventDefault(); // ✅ prevent page reload
@@ -25,9 +36,14 @@ function Login() {
 
       localStorage.setItem("token", res.data.token);
 
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
+
       toast.success("Login successful 🎉");
       navigate("/dashboard");
-
     } catch (err) {
       toast.error("Invalid email or password ❌");
     } finally {
@@ -45,6 +61,7 @@ function Login() {
           type="email"
           placeholder="Email Address"
           value={email}
+          autoComplete="email"
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -53,8 +70,18 @@ function Login() {
           type="password"
           placeholder="Password"
           value={password}
+          autoComplete="current-password"
           onChange={(e) => setPassword(e.target.value)}
         />
+
+        <label className="remember-row">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />
+          <span>Remember me</span>
+        </label>
 
         <button className="auth-btn" type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}

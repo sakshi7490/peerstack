@@ -131,3 +131,19 @@ body {
   text-decoration: underline;
   color: var(--primary);
 }
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--subtext);
+  font-size: 14px;
+}
+
+.remember-row input {
+  cursor: pointer;
+}
+
+.remember-row span {
+  cursor: pointer;
+}

@@ -47,6 +47,8 @@ router.post(
         score: 0,
         feedback: "",
         status: "pending",
+        resumeText: resumeText,
+        interviewType: "resume",
     });
 
       res.status(201).json({

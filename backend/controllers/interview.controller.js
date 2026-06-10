@@ -30,8 +30,7 @@ exports.startInterview = async (req, res) => {
       score: 0,
       feedback: "",
       status: "pending",
-      resumeText: resumeText,
-      interviewType: "resume",
+      
     });
 
     res.json({

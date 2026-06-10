@@ -16,7 +16,7 @@ function Register() {
 
     try {
       await API.post("/auth/register", {
-        name,
+        username: name,
         email,
         password,
       });
@@ -24,50 +24,53 @@ function Register() {
       toast.success("Registered successfully");
       navigate("/");
     } catch (err) {
-      toast.error("Registration failed");
-    }
+  toast.error(err.response?.data?.message || "Registration failed");
+}
   };
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">Create Account</h2>
+  <div className="auth-container">
+    <h2 className="auth-title">Create Account</h2>
 
-      <form className="auth-form" onSubmit={handleRegister}>
-        <input
-          className="auth-input"
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+    <form className="auth-form" onSubmit={handleRegister}>
+      <input
+        className="auth-input"
+        type="text"
+        placeholder="Username"
+        value={name}
+        autoComplete="username"
+        onChange={(e) => setName(e.target.value)}
+      />
 
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <input
+        className="auth-input"
+        type="email"
+        placeholder="Email Address"
+        value={email}
+        autoComplete="email"
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      <input
+        className="auth-input"
+        type="password"
+        placeholder="Password"
+        value={password}
+        autoComplete="new-password"
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        <button className="auth-btn" type="submit">
-          Register
-        </button>
-      </form>
+      <button className="auth-btn" type="submit">
+        Register
+      </button>
+    </form>
 
-      <p className="auth-footer">
-        Already have an account?{" "}
-        <span onClick={() => navigate("/")}>Login</span>
-      </p>
-    </div>
-  );
+    <p className="auth-footer">
+      Already have an account?{" "}
+      <span onClick={() => navigate("/")}>Login</span>
+    </p>
+  </div>
+);
 }
 
 export default Register;

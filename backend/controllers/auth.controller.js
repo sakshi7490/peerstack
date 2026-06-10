@@ -2,6 +2,8 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+
+
 // REGISTER
 exports.registerUser = async (req, res) => {
   try {
@@ -33,9 +35,14 @@ exports.registerUser = async (req, res) => {
     email: user.email,
   },
 });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  } catch (err) {
+  console.log("REGISTER ERROR:", err);
+
+  res.status(500).json({
+    success: false,
+    message: err.message,
+  });
+}
 };
 
 // LOGIN
