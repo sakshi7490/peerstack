@@ -11,6 +11,7 @@ const {
   submitAnswers,
   getInterviewResult,
   getAllInterviews,
+  getInterviewAnalytics,
 } = require("../controllers/interview.controller");
 
 const router = express.Router();
@@ -69,6 +70,7 @@ router.post(
 // 🔥 FIRST: Specific routes
 router.post("/start", authMiddleware, startInterview);
 router.post("/submit", authMiddleware, submitAnswers);
+router.get("/analytics", authMiddleware, getInterviewAnalytics);
 
 // 🔥 THEN: General routes
 router.get("/", authMiddleware, getAllInterviews);

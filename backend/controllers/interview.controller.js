@@ -26,7 +26,7 @@ exports.startInterview = async (req, res) => {
     const interview = await Interview.create({
       userId: req.user,
       role,
-      questions: formattedQuestions, 
+      questions: formattedQuestions,
       score: 0,
       feedback: "",
       status: "pending",
@@ -39,7 +39,6 @@ exports.startInterview = async (req, res) => {
       message: "Interview started",
       data: interview,
     });
-
   } catch (error) {
     console.log(error); // 👈 ADD THIS FOR DEBUG
     res.status(500).json({
@@ -48,8 +47,6 @@ exports.startInterview = async (req, res) => {
     });
   }
 };
-
-
 
 // SUBMIT ANSWERS (AI VERSION)
 exports.submitAnswers = async (req, res) => {
@@ -88,15 +85,14 @@ exports.submitAnswers = async (req, res) => {
     }));
 
     // 🔥 AI Evaluation
-    const questionsList = interview.questions.map(q => q.question);
-    const answersList = interview.questions.map(q => q.answer);
+    const questionsList = interview.questions.map((q) => q.question);
+    const answersList = interview.questions.map((q) => q.answer);
 
-    
     const aiFeedback = await evaluateAnswers(
-  questionsList,
-  answersList,
-  interview.resumeText
-);
+      questionsList,
+      answersList,
+      interview.resumeText,
+    );
 
     // ✅ Store feedback
     interview.feedback = aiFeedback;
@@ -118,7 +114,6 @@ exports.submitAnswers = async (req, res) => {
       message: "Answers submitted (AI evaluated)",
       data: interview,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -154,15 +149,12 @@ exports.getInterviewResult = async (req, res) => {
   }
 };
 
-
 // GET ALL INTERVIEWS FOR USER
 exports.getAllInterviews = async (req, res) => {
   try {
     const interviews = await Interview.find({ userId: req.user }).sort({
       createdAt: -1,
     });
-
-    
 
     res.json({
       success: true,
@@ -173,6 +165,86 @@ exports.getAllInterviews = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// GET INTERVIEW ANALYTICS
+exports.getInterviewAnalytics = async (req, res) => {
+  try {
+    const interviews = await Interview.find({
+      userId: req.user,
+      status: "completed",
+    });
+
+    const totalCompleted = interviews.length;
+
+    const totalScore = interviews.reduce(
+      (sum, item) => sum + (item.score || 0),
+      0,
+    );
+
+    const averageScore =
+      totalCompleted > 0 ? (totalScore / totalCompleted).toFixed(1) : 0;
+
+    const bestScore =
+      totalCompleted > 0
+        ? Math.max(...interviews.map((item) => item.score || 0))
+        : 0;
+
+    const resumeInterviews = interviews.filter(
+      (item) => item.interviewType === "resume",
+    ).length;
+
+    const standardInterviews = interviews.filter(
+      (item) => item.interviewType !== "resume",
+    ).length;
+
+    const totalQuestionsAnswered = interviews.reduce(
+      (sum, item) => sum + item.questions.length,
+      0,
+    );
+
+    const roleStats = {};
+
+    interviews.forEach((item) => {
+      if (!roleStats[item.role]) {
+        roleStats[item.role] = {
+          count: 0,
+          totalScore: 0,
+        };
+      }
+
+      roleStats[item.role].count += 1;
+      roleStats[item.role].totalScore += item.score || 0;
+    });
+
+    const roleWisePerformance = Object.keys(roleStats).map((role) => ({
+      role,
+      count: roleStats[role].count,
+      averageScore: (
+        roleStats[role].totalScore / roleStats[role].count
+      ).toFixed(1),
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        totalCompleted,
+        averageScore,
+        bestScore,
+        resumeInterviews,
+        standardInterviews,
+        totalQuestionsAnswered,
+        roleWisePerformance,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch analytics",
     });
   }
 };
