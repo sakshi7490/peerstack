@@ -20,8 +20,9 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://your-frontend-url.vercel.app"
+      "https://peerstack.vercel.app"
     ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
