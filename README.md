@@ -161,7 +161,7 @@ npm start
 
 **Sakshi Pal**
 
-* LinkedIn: https://www.linkedin.com/in/sakshi-pal7004ab2a9
+* www.linkedin.com/in/sakshi-pal03
 * GitHub: https://github.com/sakshi7490
 
 ---
