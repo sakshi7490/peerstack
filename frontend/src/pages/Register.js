@@ -12,7 +12,7 @@ function Register() {
   const [password, setPassword] = useState("");
 
   const handleRegister = async (e) => {
-    e.preventDefault(); // ✅ important (form reload rokne ke liye)
+    e.preventDefault();
 
     try {
       await API.post("/auth/register", {
@@ -24,53 +24,89 @@ function Register() {
       toast.success("Registered successfully");
       navigate("/");
     } catch (err) {
-  toast.error(err.response?.data?.message || "Registration failed");
-}
+      toast.error(
+        err.response?.data?.message || "Registration failed"
+      );
+    }
   };
 
   return (
-  <div className="auth-container">
-    <h2 className="auth-title">Create Account</h2>
+    <div className="register-page">
+      <div className="auth-container">
 
-    <form className="auth-form" onSubmit={handleRegister}>
-      <input
-        className="auth-input"
-        type="text"
-        placeholder="Username"
-        value={name}
-        autoComplete="username"
-        onChange={(e) => setName(e.target.value)}
-      />
+        <div className="auth-icon">
+          ✦
+        </div>
 
-      <input
-        className="auth-input"
-        type="email"
-        placeholder="Email Address"
-        value={email}
-        autoComplete="email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <h2 className="auth-title">Create Account</h2>
 
-      <input
-        className="auth-input"
-        type="password"
-        placeholder="Password"
-        value={password}
-        autoComplete="new-password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <p className="auth-subtitle">
+          Join PeerStack and start your interview journey
+        </p>
 
-      <button className="auth-btn" type="submit">
-        Register
-      </button>
-    </form>
+        <form className="auth-form" onSubmit={handleRegister}>
 
-    <p className="auth-footer">
-      Already have an account?{" "}
-      <span onClick={() => navigate("/")}>Login</span>
-    </p>
-  </div>
-);
+          <div className="auth-field">
+            <label>Username</label>
+
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Enter your username"
+              value={name}
+              autoComplete="username"
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-field">
+            <label>Email Address</label>
+
+            <input
+              className="auth-input"
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              autoComplete="email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-field">
+            <label>Password</label>
+
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="Create a strong password"
+              value={password}
+              autoComplete="new-password"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <button className="auth-btn" type="submit">
+            Register <span>→</span>
+          </button>
+
+        </form>
+
+        <div className="auth-divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
+        </div>
+
+        <p className="auth-footer">
+          Already have an account?{" "}
+          <span onClick={() => navigate("/")}>
+            Login
+          </span>
+        </p>
+
+      </div>
+    </div>
+  );
 }
 
 export default Register;
