@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import toast from "react-hot-toast";
@@ -14,16 +14,16 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-  const savedEmail = localStorage.getItem("rememberedEmail");
+    const savedEmail = localStorage.getItem("rememberedEmail");
 
-  if (savedEmail) {
-    setEmail(savedEmail);
-    setRememberMe(true);
-  }
-}, []);
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // ✅ prevent page reload
+    e.preventDefault();
 
     if (!email || !password) {
       return toast.error("All fields are required");
@@ -32,7 +32,10 @@ function Login() {
     try {
       setLoading(true);
 
-      const res = await API.post("/auth/login", { email, password });
+      const res = await API.post("/auth/login", {
+        email,
+        password,
+      });
 
       localStorage.setItem("token", res.data.token);
 
@@ -52,46 +55,203 @@ function Login() {
   };
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">Continue your interview journey</h2>
+    <div className="auth-page">
 
-      <form className="auth-form" onSubmit={handleLogin}>
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          autoComplete="email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      {/* =========================
+          LEFT BRANDING SECTION
+      ========================= */}
+      <section className="auth-visual">
 
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Password"
-          value={password}
-          autoComplete="current-password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div
+          className="auth-logo"
+          onClick={() => navigate("/")}
+        >
+          <div className="auth-logo-icon">✦</div>
+          <span>PeerStack</span>
+        </div>
 
-        <label className="remember-row">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-          <span>Remember me</span>
-        </label>
+        <div className="auth-visual-content">
 
-        <button className="auth-btn" type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          <span className="auth-badge">
+            ✦ AI-Powered Interview Practice
+          </span>
 
-      <p className="auth-footer">
-        Don’t have an account?{" "}
-        <span onClick={() => navigate("/register")}>Register</span>
-      </p>
+          <h1>
+            Practice smarter.
+            <br />
+            <span>Get interview-ready.</span>
+          </h1>
+
+          <p>
+            Simulate real technical and HR interviews, get personalized
+            AI feedback, and track your progress — all in one place.
+          </p>
+
+          <div className="auth-highlights">
+
+            <div className="auth-highlight">
+              <span>✦</span>
+              <div>
+                <strong>AI-Powered Feedback</strong>
+                <small>Improve with every answer</small>
+              </div>
+            </div>
+
+            <div className="auth-highlight">
+              <span>✓</span>
+              <div>
+                <strong>Resume-Based Practice</strong>
+                <small>Questions tailored to your profile</small>
+              </div>
+            </div>
+
+            <div className="auth-highlight">
+              <span>↗</span>
+              <div>
+                <strong>Performance Analytics</strong>
+                <small>Track your interview progress</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="auth-visual-footer">
+          © 2026 PeerStack
+        </div>
+
+      </section>
+
+
+      {/* =========================
+          RIGHT LOGIN SECTION
+      ========================= */}
+      <section className="auth-form-section">
+
+        <div className="auth-container">
+
+          <div className="mobile-logo">
+            <div className="auth-logo-icon">✦</div>
+            <span>PeerStack</span>
+          </div>
+
+          <div className="auth-heading">
+
+            <h2>Welcome back</h2>
+
+            <p>
+              Continue your interview preparation
+            </p>
+
+          </div>
+
+          <form
+            className="auth-form"
+            onSubmit={handleLogin}
+          >
+
+            {/* Email */}
+            <div className="input-group">
+
+              <label htmlFor="email">
+                Email address
+              </label>
+
+              <input
+                id="email"
+                className="auth-input"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                autoComplete="email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+            </div>
+
+
+            {/* Password */}
+            <div className="input-group">
+
+              <div className="password-label-row">
+                <label htmlFor="password">
+                  Password
+                </label>
+
+                <span className="forgot-password">
+                  Forgot password?
+                </span>
+              </div>
+
+              <input
+                id="password"
+                className="auth-input"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                autoComplete="current-password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+            </div>
+
+
+            {/* Remember Me */}
+            <label className="remember-row">
+
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) =>
+                  setRememberMe(e.target.checked)
+                }
+              />
+
+              <span>Remember me</span>
+
+            </label>
+
+
+            {/* Login Button */}
+            <button
+              className="auth-btn"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? (
+                "Logging in..."
+              ) : (
+                <>
+                  Login
+                  <span>→</span>
+                </>
+              )}
+            </button>
+
+          </form>
+
+
+          {/* Register */}
+          <p className="auth-footer">
+            Don't have an account?{" "}
+            <span onClick={() => navigate("/register")}>
+              Create one
+            </span>
+          </p>
+
+
+          {/* Back to Home */}
+          <button
+            className="back-home"
+            onClick={() => navigate("/")}
+          >
+            ← Back to home
+          </button>
+
+        </div>
+
+      </section>
+
     </div>
   );
 }
