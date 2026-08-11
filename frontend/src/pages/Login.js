@@ -12,6 +12,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
@@ -44,37 +46,61 @@ function Login() {
       } else {
         localStorage.removeItem("rememberedEmail");
       }
+      setShowResend(false);
 
-      toast.success("Login successful 🎉");
+      toast.success("Login successful..");
       navigate("/dashboard");
     } catch (err) {
-      toast.error("Invalid email or password ❌");
+      const message = err.response?.data?.message;
+
+      if (message === "Please verify your email before logging in.") {
+        toast.error(message);
+        return;
+      }
+
+      toast.error(message || "Invalid email or password ");
     } finally {
       setLoading(false);
     }
   };
 
+  //handling resend verification
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      return toast.error("Please enter your email first");
+    }
+
+    try {
+      setResendLoading(true);
+
+      const res = await API.post("/auth/resend-verification", {
+        email,
+      });
+
+      toast.success(res.data.message || "Verification email sent!");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Unable to resend verification email",
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
-
       {/* =========================
           LEFT BRANDING SECTION
       ========================= */}
       <section className="auth-visual">
-
-        <div
-          className="auth-logo"
-          onClick={() => navigate("/")}
-        >
+        <div className="auth-logo" onClick={() => navigate("/")}>
           <div className="auth-logo-icon">✦</div>
           <span>PeerStack</span>
         </div>
 
         <div className="auth-visual-content">
-
-          <span className="auth-badge">
-            ✦ AI-Powered Interview Practice
-          </span>
+          <span className="auth-badge">✦ AI-Powered Interview Practice</span>
 
           <h1>
             Practice smarter.
@@ -83,12 +109,11 @@ function Login() {
           </h1>
 
           <p>
-            Simulate real technical and HR interviews, get personalized
-            AI feedback, and track your progress — all in one place.
+            Simulate real technical and HR interviews, get personalized AI
+            feedback, and track your progress — all in one place.
           </p>
 
           <div className="auth-highlights">
-
             <div className="auth-highlight">
               <span>✦</span>
               <div>
@@ -112,50 +137,32 @@ function Login() {
                 <small>Track your interview progress</small>
               </div>
             </div>
-
           </div>
         </div>
 
-        <div className="auth-visual-footer">
-          © 2026 PeerStack
-        </div>
-
+        <div className="auth-visual-footer">© 2026 PeerStack</div>
       </section>
-
 
       {/* =========================
           RIGHT LOGIN SECTION
       ========================= */}
       <section className="auth-form-section">
-
         <div className="auth-container">
-
           <div className="mobile-logo">
             <div className="auth-logo-icon">✦</div>
             <span>PeerStack</span>
           </div>
 
           <div className="auth-heading">
-
             <h2>Welcome back</h2>
 
-            <p>
-              Continue your interview preparation
-            </p>
-
+            <p>Continue your interview preparation</p>
           </div>
 
-          <form
-            className="auth-form"
-            onSubmit={handleLogin}
-          >
-
+          <form className="auth-form" onSubmit={handleLogin}>
             {/* Email */}
             <div className="input-group">
-
-              <label htmlFor="email">
-                Email address
-              </label>
+              <label htmlFor="email">Email address</label>
 
               <input
                 id="email"
@@ -166,21 +173,14 @@ function Login() {
                 autoComplete="email"
                 onChange={(e) => setEmail(e.target.value)}
               />
-
             </div>
-
 
             {/* Password */}
             <div className="input-group">
-
               <div className="password-label-row">
-                <label htmlFor="password">
-                  Password
-                </label>
+                <label htmlFor="password">Password</label>
 
-                <span className="forgot-password">
-                  Forgot password?
-                </span>
+                <span className="forgot-password">Forgot password?</span>
               </div>
 
               <input
@@ -192,32 +192,21 @@ function Login() {
                 autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
               />
-
             </div>
-
 
             {/* Remember Me */}
             <label className="remember-row">
-
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={(e) =>
-                  setRememberMe(e.target.checked)
-                }
+                onChange={(e) => setRememberMe(e.target.checked)}
               />
 
               <span>Remember me</span>
-
             </label>
 
-
             {/* Login Button */}
-            <button
-              className="auth-btn"
-              type="submit"
-              disabled={loading}
-            >
+            <button className="auth-btn" type="submit" disabled={loading}>
               {loading ? (
                 "Logging in..."
               ) : (
@@ -228,30 +217,33 @@ function Login() {
               )}
             </button>
 
-          </form>
+            {showResend && (
+              <div className="resend-verification">
+                <span>Didn't receive the verification email?</span>
 
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                >
+                  {resendLoading ? "Sending..." : "Resend verification email"}
+                </button>
+              </div>
+            )}
+          </form>
 
           {/* Register */}
           <p className="auth-footer">
             Don't have an account?{" "}
-            <span onClick={() => navigate("/register")}>
-              Create one
-            </span>
+            <span onClick={() => navigate("/register")}>Create one</span>
           </p>
 
-
           {/* Back to Home */}
-          <button
-            className="back-home"
-            onClick={() => navigate("/")}
-          >
+          <button className="back-home" onClick={() => navigate("/")}>
             ← Back to home
           </button>
-
         </div>
-
       </section>
-
     </div>
   );
 }

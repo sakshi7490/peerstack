@@ -250,6 +250,168 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+// =====================================================
+// RESEND VERIFICATION EMAIL
+// =====================================================
+
+exports.resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email.",
+      });
+    }
+
+    // Already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is already verified. Please login.",
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto
+      .randomBytes(32)
+      .toString("hex");
+
+    // Hash token before storing
+    const hashedVerificationToken = crypto
+      .createHash("sha256")
+      .update(verificationToken)
+      .digest("hex");
+
+    // New expiry: 15 minutes
+    const verificationExpiry =
+      Date.now() + 15 * 60 * 1000;
+
+    // Replace old token with new token
+    user.emailVerificationToken =
+      hashedVerificationToken;
+
+    user.emailVerificationExpires =
+      verificationExpiry;
+
+    await user.save();
+
+    // New verification URL
+    const verificationUrl =
+      `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+
+    // Send new email
+    const mailOptions = {
+      from: `"PeerStack" <${process.env.EMAIL_USER}>`,
+
+      to: user.email,
+
+      subject: "Verify your PeerStack email",
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 40px;
+          background: #f8f9ff;
+        ">
+
+          <div style="
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+          ">
+
+            <h1 style="
+              color: #111827;
+              margin-bottom: 10px;
+            ">
+              Verify your PeerStack email
+            </h1>
+
+            <p style="
+              color: #64748b;
+              font-size: 16px;
+              line-height: 1.6;
+            ">
+              Hi ${user.username},
+            </p>
+
+            <p style="
+              color: #64748b;
+              font-size: 16px;
+              line-height: 1.6;
+            ">
+              Your previous verification link has expired or
+              you requested a new one.
+              Click the button below to verify your email.
+            </p>
+
+            <div style="margin: 30px 0;">
+
+              <a
+                href="${verificationUrl}"
+                style="
+                  display: inline-block;
+                  padding: 14px 24px;
+                  background: #635bff;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 10px;
+                  font-weight: bold;
+                "
+              >
+                Verify Email →
+              </a>
+
+            </div>
+
+            <p style="
+              color: #94a3b8;
+              font-size: 13px;
+              line-height: 1.5;
+            ">
+              This verification link will expire in 15 minutes.
+            </p>
+
+          </div>
+
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({
+      success: true,
+      message:
+        "A new verification email has been sent.",
+    });
+
+  } catch (error) {
+    console.log("RESEND VERIFICATION ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 // =====================================================
 // LOGIN

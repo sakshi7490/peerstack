@@ -4,6 +4,7 @@ const {
   registerUser,
   loginUser,
   verifyEmail,
+  resendVerificationEmail,
   forgotPassword,
   resetPassword,
 } = require("../controllers/auth.controller");
@@ -21,6 +22,12 @@ router.post("/login", loginUser);
 //verfiy email
 
 router.get("/verify-email/:token", verifyEmail);
+
+//resend verification
+router.post(
+  "/resend-verification",
+  resendVerificationEmail
+);
 
 
 // Forgot Password
