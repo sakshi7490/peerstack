@@ -414,6 +414,267 @@ exports.resendVerificationEmail = async (req, res) => {
 
 
 // =====================================================
+// FORGOT PASSWORD
+// =====================================================
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    // Security: don't reveal whether email exists
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "If an account exists with this email, a password reset link has been sent.",
+      });
+    }
+
+    // Generate secure random token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // Store only hashed token in database
+    const hashedResetToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    // Token expires in 15 minutes
+    const resetExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.passwordResetToken = hashedResetToken;
+    user.passwordResetExpires = resetExpiry;
+
+    await user.save();
+
+    console.log("RESET TOKEN:", resetToken);
+console.log("HASHED TOKEN:", hashedResetToken);
+console.log("SAVED USER:", user);
+
+    // Frontend reset URL
+    const resetUrl =
+      `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+    const mailOptions = {
+      from: `"PeerStack" <${process.env.EMAIL_USER}>`,
+
+      to: user.email,
+
+      subject: "Reset your PeerStack password",
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 40px;
+          background: #f8f9ff;
+        ">
+
+          <div style="
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+          ">
+
+            <h1 style="
+              color: #111827;
+              margin-bottom: 10px;
+            ">
+              Reset your password
+            </h1>
+
+            <p style="
+              color: #64748b;
+              font-size: 16px;
+              line-height: 1.6;
+            ">
+              Hi ${user.username},
+            </p>
+
+            <p style="
+              color: #64748b;
+              font-size: 16px;
+              line-height: 1.6;
+            ">
+              We received a request to reset your PeerStack
+              password. Click the button below to create a
+              new password.
+            </p>
+
+            <div style="margin: 30px 0;">
+
+              <a
+                href="${resetUrl}"
+                style="
+                  display: inline-block;
+                  padding: 14px 24px;
+                  background: #635bff;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 10px;
+                  font-weight: bold;
+                "
+              >
+                Reset Password →
+              </a>
+
+            </div>
+
+            <p style="
+              color: #94a3b8;
+              font-size: 13px;
+              line-height: 1.5;
+            ">
+              This password reset link will expire in 15 minutes.
+            </p>
+
+            <p style="
+              color: #94a3b8;
+              font-size: 13px;
+              line-height: 1.5;
+            ">
+              If you did not request a password reset,
+              you can safely ignore this email.
+            </p>
+
+          </div>
+
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "If an account exists with this email, a password reset link has been sent.",
+    });
+
+  } catch (error) {
+    console.log("FORGOT PASSWORD ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+};
+
+
+
+// =====================================================
+// RESET PASSWORD
+// =====================================================
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "New password is required",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Hash token received from URL
+    const hashedResetToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    // Find user with valid token and non-expired token
+    console.log("TOKEN FROM URL:", token);
+console.log("HASHED TOKEN:", hashedResetToken);
+
+const userByToken = await User.findOne({
+  passwordResetToken: hashedResetToken,
+});
+
+console.log("USER FOUND BY TOKEN:", userByToken);
+
+if (!userByToken) {
+  return res.status(400).json({
+    success: false,
+    message: "Token does not match any user",
+  });
+}
+
+console.log("TOKEN EXPIRY:", userByToken.passwordResetExpires);
+console.log("CURRENT TIME:", new Date());
+
+if (userByToken.passwordResetExpires < Date.now()) {
+  return res.status(400).json({
+    success: false,
+    message: "Reset token has expired",
+  });
+}
+
+const user = userByToken;
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired password reset link",
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedPassword = await bcrypt.hash(
+      password,
+      salt
+    );
+
+    user.password = hashedPassword;
+
+    // Invalidate reset token after successful use
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now login.",
+    });
+
+  } catch (error) {
+    console.log("RESET PASSWORD ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+};
+
+
+// =====================================================
 // LOGIN
 // =====================================================
 

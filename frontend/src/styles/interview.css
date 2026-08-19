@@ -122,3 +122,64 @@ body {
   border-radius: 10px;
   transition: width 0.3s ease;
 }
+
+/* ================================
+   Answer Input / Textarea
+================================ */
+
+.question-card input,
+.question-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+
+  padding: 14px 16px;
+  margin: 16px 0 0;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font-size: 16px;
+  font-family: inherit;
+
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Textarea specific */
+.question-card textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Placeholder */
+.question-card input::placeholder,
+.question-card textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+/* Focus */
+.question-card input:focus,
+.question-card textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* Prevent input from touching card edges */
+.question-card {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 28px 26px;
+}
+
+/* Question heading */
+.question-card h3,
+.question-card h4 {
+  margin: 0;
+  color: #0f172a;
+}

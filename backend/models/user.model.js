@@ -33,18 +33,18 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Password reset fields
-    resetPasswordToken: {
+    // Password reset
+    passwordResetToken: {
       type: String,
       default: null,
     },
 
-    resetPasswordExpires: {
+    passwordResetExpires: {
       type: Date,
       default: null,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("User", userSchema);
