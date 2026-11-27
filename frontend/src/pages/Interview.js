@@ -1,9 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import "../styles/interview.css";
 import Navbar from "../components/Navbar";
+import AnswerInput from "../components/AnswerInput";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
+import { DEFAULT_SPEECH_LANG } from "../utils/speechTranscript";
 
 function Interview() {
   const { id } = useParams();
@@ -12,33 +15,57 @@ function Interview() {
   const [time, setTime] = useState(1000);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
+  const [answerMode, setAnswerMode] = useState("text");
+  const [recordingIndex, setRecordingIndex] = useState(null);
 
-  // Prevent multiple submissions
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Prevent submission after successful submission
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const submitRef = useRef(null);
+  const recordingIndexRef = useRef(null);
+  const answersRef = useRef([]);
 
-  // ✅ Progress calculation
-  const answeredCount = answers.filter(
-    (ans) => ans.trim() !== ""
-  ).length;
+  const handleTranscriptChange = useCallback((committed) => {
+    const index = recordingIndexRef.current;
+    if (index === null || index === undefined) return;
+
+    const updated = [...answersRef.current];
+    updated[index] = committed;
+    answersRef.current = updated;
+    setAnswers(updated);
+  }, []);
+
+  const {
+    isSupported,
+    isListening,
+    isStarting,
+    interimTranscript,
+    elapsedSeconds,
+    error,
+    start,
+    stop,
+    clearError,
+  } = useSpeechRecognition({
+    onTranscriptChange: handleTranscriptChange,
+    lang: DEFAULT_SPEECH_LANG,
+  });
+
+  const answeredCount = answers.filter((ans) => ans.trim() !== "").length;
 
   const progress = questions.length
     ? Math.round((answeredCount / questions.length) * 100)
     : 0;
 
-  // ✅ Fetch interview
   useEffect(() => {
     const fetchInterview = async () => {
       try {
         const res = await API.get(`/interview/${id}`);
         const data = res.data.data.questions;
 
+        const emptyAnswers = new Array(data.length).fill("");
         setQuestions(data);
-        setAnswers(new Array(data.length).fill(""));
+        answersRef.current = emptyAnswers;
+        setAnswers(emptyAnswers);
       } catch (err) {
         console.log(err);
         toast.error("Failed to load interview");
@@ -48,63 +75,114 @@ function Interview() {
     fetchInterview();
   }, [id]);
 
-  // ✅ Handle input
   const handleChange = (index, value) => {
-    // Don't allow editing while submitting
     if (isSubmitting || isSubmitted) return;
 
-    const updated = [...answers];
+    const updated = [...answersRef.current];
     updated[index] = value;
-
+    answersRef.current = updated;
     setAnswers(updated);
   };
 
-  // ✅ Submit answers
+  const stopRecording = useCallback(() => {
+    stop();
+    recordingIndexRef.current = null;
+    setRecordingIndex(null);
+  }, [stop]);
+
+  const startRecording = async (index) => {
+    if (isSubmitting || isSubmitted) return;
+    if (!isSupported) return;
+
+    if (isListening) {
+      stop();
+    }
+
+    clearError();
+    setRecordingIndex(index);
+    recordingIndexRef.current = index;
+
+    const existing = answersRef.current[index] || "";
+    await start(existing);
+  };
+
+  const retryRecording = async (index) => {
+    if (isSubmitting || isSubmitted) return;
+
+    recordingIndexRef.current = null;
+    stop();
+    handleChange(index, "");
+    clearError();
+    setRecordingIndex(index);
+    recordingIndexRef.current = index;
+
+    await start("");
+  };
+
+  const clearAnswer = (index) => {
+    if (isSubmitting || isSubmitted) return;
+    if (recordingIndex === index) {
+      stopRecording();
+    }
+    handleChange(index, "");
+  };
+
+  const switchMode = (mode) => {
+    if (isSubmitting || isSubmitted) return;
+    if (mode === answerMode) return;
+
+    if (isListening || recordingIndex !== null) {
+      stopRecording();
+    }
+
+    setAnswerMode(mode);
+    if (mode === "voice") {
+      clearError();
+    }
+  };
+
   const handleSubmit = async () => {
-    // 🚫 Prevent multiple clicks / duplicate API calls
     if (isSubmitting || isSubmitted) {
       return;
     }
 
     try {
-      // 🔒 Disable button immediately
+      if (isListening || recordingIndex !== null) {
+        stop();
+        recordingIndexRef.current = null;
+        setRecordingIndex(null);
+      }
+
       setIsSubmitting(true);
 
       await API.post("/interview/submit", {
         interviewId: id,
-        answers,
+        answers: answersRef.current,
       });
 
-      // Mark interview as successfully submitted
       setIsSubmitted(true);
 
       toast.success("Interview submitted successfully!");
 
-      // Navigate to result page
       navigate(`/result/${id}`);
-
     } catch (err) {
       console.log(err);
       toast.error("Error submitting answers. Please try again.");
 
-      // 🔓 Allow user to submit again if API fails
       setIsSubmitting(false);
     }
   };
 
-  // Always keep latest submit function
   useEffect(() => {
     submitRef.current = handleSubmit;
   });
 
-  // ✅ Timer
   useEffect(() => {
     const timer = setInterval(() => {
       setTime((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
 
-          // Automatically submit when time is over
           if (submitRef.current) {
             submitRef.current();
           }
@@ -119,13 +197,13 @@ function Interview() {
     return () => clearInterval(timer);
   }, []);
 
+  const controlsLocked = isSubmitting || isSubmitted;
+
   return (
     <>
       <Navbar />
 
       <div className="container">
-
-        {/* 🔥 TIMER */}
         <h3
           className="timer"
           style={{
@@ -137,11 +215,8 @@ function Interview() {
           ⏱ Time Left: {time}s
         </h3>
 
-        {/* 🔥 PROGRESS */}
         <div className="progress-container">
-          <p style={{ textAlign: "center" }}>
-            Progress: {progress}%
-          </p>
+          <p style={{ textAlign: "center" }}>Progress: {progress}%</p>
 
           <div className="progress-bar-bg">
             <div
@@ -153,31 +228,75 @@ function Interview() {
 
         <h2 className="title">Interview</h2>
 
-        {/* QUESTIONS */}
-        {questions.map((q, index) => (
-          <div key={index} className="question-card">
-            <p>
-              <b>{q.question}</b>
-            </p>
+        <div className="answer-mode-toggle" role="tablist" aria-label="Answer mode">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={answerMode === "text"}
+            className={`mode-btn${answerMode === "text" ? " active" : ""}`}
+            onClick={() => switchMode("text")}
+            disabled={controlsLocked}
+          >
+            Type Answer
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={answerMode === "voice"}
+            className={`mode-btn${answerMode === "voice" ? " active" : ""}`}
+            onClick={() => switchMode("voice")}
+            disabled={controlsLocked}
+          >
+            Speak Answer
+          </button>
+        </div>
 
-            <input
-              type="text"
-              placeholder="Your answer"
-              value={answers[index] || ""}
-              onChange={(e) =>
-                handleChange(index, e.target.value)
-              }
-              className="input-box"
-              disabled={isSubmitting || isSubmitted}
-            />
+        <p className="mode-hint">
+          {answerMode === "text"
+            ? "Type your answers below. You can switch to voice at any time without losing what you wrote."
+            : "Speak your answers in Indian English. Finalized sentences stay saved if you pause. Edit the transcript before submitting."}
+        </p>
+
+        {answerMode === "voice" && !isSupported && (
+          <div className="voice-alert" role="status">
+            Voice input is not supported in this browser. You can keep typing
+            your answers, or try Chrome or Edge for speech-to-text.
           </div>
-        ))}
+        )}
 
-        {/* SUBMIT */}
+        {questions.map((q, index) => {
+          const isRecordingThis = recordingIndex === index && (isListening || isStarting);
+
+          return (
+            <div key={index} className="question-card">
+              <p>
+                <b>{q.question}</b>
+              </p>
+
+              <AnswerInput
+                mode={answerMode}
+                value={answers[index] || ""}
+                onChange={(value) => handleChange(index, value)}
+                disabled={controlsLocked}
+                isSupported={isSupported}
+                isRecording={isRecordingThis && isListening}
+                isStarting={isRecordingThis && isStarting}
+                elapsedSeconds={isRecordingThis ? elapsedSeconds : 0}
+                interimTranscript={isRecordingThis ? interimTranscript : ""}
+                error={recordingIndex === index ? error : null}
+                onStartRecording={() => startRecording(index)}
+                onStopRecording={stopRecording}
+                onRetryRecording={() => retryRecording(index)}
+                onClear={() => clearAnswer(index)}
+              />
+            </div>
+          );
+        })}
+
         <button
           onClick={handleSubmit}
           className="submit-btn"
-          disabled={isSubmitting || isSubmitted}
+          disabled={controlsLocked}
         >
           {isSubmitting
             ? "AI is evaluating your answers..."
@@ -185,7 +304,6 @@ function Interview() {
             ? "Submitted"
             : "Submit"}
         </button>
-
       </div>
     </>
   );
